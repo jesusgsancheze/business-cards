@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Digital Business Card</title>
+  <meta name="description" content="Interactive digital business card">
+  <meta name="theme-color" content="#0B0A10">
+  <meta property="og:title" content="Digital Business Card">
+  <meta property="og:description" content="Tap to flip. Scan to save the contact.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="css/card.css">
+  <style>*,*::before,*::after{box-sizing:border-box} body{margin:0}</style>
+</head>
+<body>
+<main class="stage" id="stage" data-bg="stage">
+  <div class="beam a" aria-hidden="true"></div>
+  <div class="beam b" aria-hidden="true"></div>
+  <div class="floor" aria-hidden="true"></div>
+
+  <div class="rig" id="rig">
+    <div class="hanger">
+      <div class="scene">
+        <div class="card" id="card" tabindex="0" role="group" aria-roledescription="business card" aria-label="Business card, press Enter to flip">
+          <!-- FRONT -->
+          <section class="face front" id="front">
+            <div class="truss"></div>
+            <div class="sheen"></div>
+            <div class="glare"></div>
+            <div class="inner">
+              <div class="band"><b id="passLabel"></b><small id="passSeason"></small></div>
+              <div class="id">
+                <div class="photo" id="photo"></div>
+                <div class="access">
+                  <div>
+                    <div class="label">Access level</div>
+                    <div class="role" id="passRole"></div>
+                  </div>
+                  <div class="seal" aria-hidden="true"><span id="sealText"></span></div>
+                </div>
+              </div>
+              <h1 class="name" id="name"></h1>
+              <div class="title" id="title"></div>
+              <div class="company" id="company"></div>
+              <ul class="chips" id="services"></ul>
+              <div class="foot">
+                <div class="barcode" id="barcode" aria-hidden="true"></div>
+                <div class="passno"><strong id="passNo"></strong>tap to flip</div>
+              </div>
+            </div>
+          </section>
+          <!-- BACK -->
+          <section class="face back inactive" id="back" aria-hidden="true">
+            <div class="truss"></div>
+            <div class="sheen"></div>
+            <div class="glare"></div>
+            <div class="inner">
+              <div class="bhead">
+                <div>
+                  <div class="logo" id="logo"></div>
+                  <div class="tag" id="tagline"></div>
+                </div>
+                <div class="flipnote">↺ Flip</div>
+              </div>
+              <ul class="contacts" id="contacts"></ul>
+              <div class="bottom">
+                <div>
+                  <div class="qr" id="qr" aria-label="QR code with contact details" role="img"></div>
+                  <div class="qrcap">Scan to save</div>
+                </div>
+                <div>
+                  <dl class="specs" id="specs"></dl>
+                  <button class="savebtn" id="saveBtn" type="button" hidden>Save contact</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="flipBtn" type="button" aria-pressed="false">Flip card</button>
+    <select class="picker" id="picker" aria-label="Choose card" hidden></select>
+    <span class="hint" id="hint">Move to tilt · tap to flip</span>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="js/cards.js"></script>
+<script src="js/card.js"></script>
+</body>
+</html>
