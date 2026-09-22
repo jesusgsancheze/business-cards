@@ -54,7 +54,7 @@ body{background:var(--stage);color:var(--ink);font-family:var(--body);overflow-x
   transform-style:preserve-3d;cursor:grab;outline:none;
   transform:rotateX(var(--rx)) rotateY(var(--ry));touch-action:pan-y}
 .card:focus-visible .face{box-shadow:0 0 0 3px var(--accent),0 30px 60px rgba(0,0,0,.6)}
-.face{position:absolute;inset:0;border-radius:4.5cqw;overflow:hidden;container-type:inline-size;
+.face{position:absolute;inset:0;border-radius:calc(var(--w, 340px) * .045);overflow:hidden;container-type:inline-size;
   backface-visibility:hidden;-webkit-backface-visibility:hidden;
   background:var(--card);color:var(--ink);
   box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 30px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);
