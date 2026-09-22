@@ -29,6 +29,15 @@ assets/           Photos, logos and backgrounds
 3. In the repository, open **Settings → Pages**, set **Source** to *Deploy from a branch*, pick `main` and `/ (root)`, and save.
 4. After a minute the site is live at `https://<your-user>.github.io/business-cards/`.
 
+## Publish on Render
+
+This repo includes a `render.yaml`, so Render can set everything up for you.
+
+1. Push the repo to GitHub.
+2. In Render, choose **New → Blueprint**, connect the GitHub repo, and click **Apply**.
+   Or choose **New → Static Site** and use: Build command *(empty)*, Publish directory `./`.
+3. Every push to `main` redeploys the site automatically.
+
 ## Link to a specific person
 
 Each card has a key in `js/cards.js`. Open it with either:

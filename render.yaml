@@ -1,0 +1,11 @@
+# Render Blueprint: deploys this repo as a free static site (no build step).
+services:
+  - type: web
+    name: business-cards
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: ./
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
