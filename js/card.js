@@ -163,6 +163,13 @@ function tick(now){
   s.x += (gx - s.x) * .09; s.y += (gy - s.y) * .09;
   s.flip += (s.flipT - s.flip) * (reduce ? 1 : .11);
   const mirror = s.flip > 90 ? -1 : 1;
+  const angle = ((s.x * 18 + s.flip) % 360 + 360) % 360;
+  const backFacing = angle > 90 && angle < 270;
+  if (backFacing !== s.backFacing) {
+    s.backFacing = backFacing;
+    front.classList.toggle("away", backFacing);
+    back.classList.toggle("away", !backFacing);
+  }
   card.style.transform = `rotateX(${(-s.y * 13).toFixed(2)}deg) rotateY(${(s.x * 18 + s.flip).toFixed(2)}deg)`;
   const st = document.documentElement.style;
   st.setProperty("--mx", (50 + s.x * 50 * mirror).toFixed(1) + "%");
