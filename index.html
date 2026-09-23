@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Digital Business Card</title>
-  <meta name="description" content="Interactive digital business card">
+  <meta name="description" content="Tarjeta de presentación digital · Digital business card">
   <meta name="theme-color" content="#0B0A10">
   <meta property="og:title" content="Digital Business Card">
-  <meta property="og:description" content="Tap to flip. Scan to save the contact.">
+  <meta property="og:description" content="Toca para voltear. Escanea para guardar el contacto.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&display=swap">
@@ -34,21 +34,16 @@
               <div class="band"><b id="passLabel"></b><small id="passSeason"></small></div>
               <div class="id">
                 <div class="photo" id="photo"></div>
-                <div class="access">
-                  <div>
-                    <div class="label">Access level</div>
-                    <div class="role" id="passRole"></div>
-                  </div>
-                  <div class="seal" aria-hidden="true"><span id="sealText"></span></div>
-                </div>
+                <div class="seal" id="seal" aria-hidden="true"></div>
               </div>
-              <h1 class="name" id="name"></h1>
-              <div class="title" id="title"></div>
-              <div class="company" id="company"></div>
-              <ul class="chips" id="services"></ul>
+              <div class="ident">
+                <h1 class="name" id="name"></h1>
+                <div class="title" id="title"></div>
+                <div class="company" id="company"></div>
+              </div>
               <div class="foot">
                 <div class="barcode" id="barcode" aria-hidden="true"></div>
-                <div class="passno"><strong id="passNo"></strong>tap to flip</div>
+                <div class="passno"><strong id="passNo"></strong><span id="tapNote"></span></div>
               </div>
             </div>
           </section>
@@ -63,17 +58,19 @@
                   <div class="logo" id="logo"></div>
                   <div class="tag" id="tagline"></div>
                 </div>
-                <div class="flipnote">↺ Flip</div>
+                <div class="flipnote" id="flipnote"></div>
               </div>
               <ul class="contacts" id="contacts"></ul>
+              <dl class="specs" id="specs" hidden></dl>
               <div class="bottom">
                 <div>
-                  <div class="qr" id="qr" aria-label="QR code with contact details" role="img"></div>
-                  <div class="qrcap">Scan to save</div>
+                  <div class="qr" id="qr" role="img"></div>
+                  <div class="qrcap" id="qrcap"></div>
                 </div>
-                <div>
-                  <dl class="specs" id="specs"></dl>
-                  <button class="savebtn" id="saveBtn" type="button" hidden>Save contact</button>
+                <div class="saveblock">
+                  <h2 class="savetitle" id="saveTitle"></h2>
+                  <p class="savesub" id="saveSub"></p>
+                  <button class="savebtn" id="saveBtn" type="button" hidden></button>
                 </div>
               </div>
             </div>
@@ -84,9 +81,14 @@
   </div>
 
   <div class="controls">
-    <button class="btn" id="flipBtn" type="button" aria-pressed="false">Flip card</button>
-    <select class="picker" id="picker" aria-label="Choose card" hidden></select>
-    <span class="hint" id="hint">Move to tilt · tap to flip</span>
+    <button class="btn" id="flipBtn" type="button" aria-pressed="false">Voltear tarjeta</button>
+    <div class="lang" id="langSwitch" role="group">
+      <button type="button" data-lang="es" lang="es">ES</button>
+      <button type="button" data-lang="en" lang="en">EN</button>
+    </div>
+    <select class="picker" id="picker" hidden></select>
+    <span class="hint" id="hint"></span>
+    <span id="live" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"></span>
   </div>
 </main>
 

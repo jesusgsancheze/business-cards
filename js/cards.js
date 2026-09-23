@@ -1,30 +1,43 @@
 /* =====================================================================
    CARDS — one entry per person.
 
-   Open a specific card with ?c=<key> or #<key>, e.g.
-     https://<user>.github.io/<repo>/?c=alejandro-castillo
+   Open a card with ?c=<key>, and pick the language with &lang=es|en:
+     https://business-cards-b6lq.onrender.com/?c=alejandro-castillo            (Spanish, default)
+     https://business-cards-b6lq.onrender.com/?c=alejandro-castillo&lang=en    (English)
+
+   Any text field can be a plain string (same in both languages) or
+   { es: "…", en: "…" } for a translated version.
 
    Images (photo, logo, background) accept a path inside this repo
    (e.g. "assets/alejandro-castillo/photo.jpg"), any URL, or a data: URI.
    ===================================================================== */
 window.CARDS = {
   "alejandro-castillo": {
-    person:  { name: "Alejandro Castillo", title: "Founder & Production Director", photo: "", initials: "AC" },
-    company: { name: "Castillo Stage & Structures", short: "CS&S", tagline: "Stages · Truss · Scaffolding", logo: "" },
-    pass:    { label: "ALL ACCESS", role: "Production", number: "CSS-0001", season: "Season 2026" },
-    services: ["Concert stages", "Truss & rigging", "Scaffolding", "Political rallies", "Expos & fairs"],
-    specs: [
-      { k: "Stage decks",  v: "2×1 m · 750 kg/m²" },
-      { k: "Truss spans",  v: "up to 18 m" },
-      { k: "Tower height", v: "up to 12 m" }
+    defaultLang: "es",
+    person:  {
+      name: "Alejandro Castillo",
+      title: { es: "Fundador y Director", en: "Founder & Director" },
+      photo: "",          // e.g. "assets/alejandro-castillo/photo.jpg" — empty shows the initials
+      initials: "AC"
+    },
+    company: {
+      name: "Sidney Producciones",
+      tagline: { es: "Tarimas · Truss · Andamios", en: "Stages · Truss · Scaffolding" },
+      logo: "",           // optional logo image for the back of the card
+      seal: { ring: "SIDNEY PRODUCCIONES", center: "SP" }   // the holographic circle on the front
+    },
+    pass: {
+      label: "ALL ACCESS",
+      number: "SP-0001",
+      season: { es: "Temporada 2026", en: "Season 2026" }
+    },
+    contacts: [ // type: phone | whatsapp | email | web | instagram | address | link (with href). label is optional.
+      { type: "phone",    value: "+58 414 216 1030" },
+      { type: "whatsapp", value: "+58 414 216 1030" },
+      { type: "email",    value: "acastillo@sidneyproducciones.com" },
+      { type: "web",      value: "sidneyproducciones.com" }
     ],
-    contacts: [ // type: phone | whatsapp | email | web | instagram | address | link (with href)
-      { type: "phone",     label: "Call",      value: "+58 412 555 0147" },
-      { type: "whatsapp",  label: "WhatsApp",  value: "+58 412 555 0147" },
-      { type: "email",     label: "Email",     value: "alejandro@castillostage.com" },
-      { type: "web",       label: "Website",   value: "castillostage.com" },
-      { type: "instagram", label: "Instagram", value: "@castillostage" }
-    ],
+    specs: [],            // optional { k, v } pairs shown on the back, e.g. { k: { es: "Tarimas", en: "Stage decks" }, v: "2×1 m" }
     theme: { accent: "#FFB547", accent2: "#FF5C8A", card: "#16151C", card2: "#201F28", ink: "#F2F1F6", steel: "#C7CAD1", stage: "#0B0A10" },
     display: "",                     // optional font for the name, e.g. "'Anton', Impact, sans-serif"
     background: { type: "stage" },   // { type:"stage" } | { type:"image", src:"assets/bg.jpg" } | { type:"gradient", value:"linear-gradient(...)" }
@@ -33,7 +46,7 @@ window.CARDS = {
 
   /* Add more people by copying the block above:
   , "maria-lopez": {
-    person:  { name: "María López", title: "Event Manager", photo: "assets/maria-lopez/photo.jpg" },
+    person:  { name: "María López", title: { es: "Gerente de Eventos", en: "Event Manager" }, photo: "assets/maria-lopez/photo.jpg" },
     ...
   }
   */

@@ -8,6 +8,8 @@ const ICONS = {
   web:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
   instagram:'<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/>',
   address:'<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/>',
+  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',
   link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'
 };
 const svg = t => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[t] || ICONS.link}</svg>`;
@@ -23,14 +25,40 @@ function hrefFor(c){
     default: return c.href || c.value;
   }
 }
+/* ---------- Language ---------- */
+const UI = {
+  es: {
+    flip: "Voltear tarjeta", front: "Ver frente", hint: "Mueve para inclinar · toca para voltear",
+    tap: "toca para voltear", flipnote: "↺ Voltear", copy: "Copiar", copied: "Copiado", selected: "Seleccionado",
+    scan: "Escanea para guardar", saveTitle: "Guarda mi contacto",
+    saveSubBtn: "Escanea el código o toca el botón.", saveSub: "Escanea el código con la cámara de tu teléfono.",
+    save: "Guardar contacto", cardLabel: "Tarjeta de presentación. Pulsa Enter para voltear.",
+    qrAlt: "Código QR con los datos de contacto", choose: "Elegir tarjeta", langLabel: "Idioma",
+    labels: { phone: "Llamar", whatsapp: "WhatsApp", email: "Correo", web: "Sitio web", instagram: "Instagram", address: "Dirección", link: "Enlace" }
+  },
+  en: {
+    flip: "Flip card", front: "Show front", hint: "Move to tilt · tap to flip",
+    tap: "tap to flip", flipnote: "↺ Flip", copy: "Copy", copied: "Copied", selected: "Selected",
+    scan: "Scan to save", saveTitle: "Save my contact",
+    saveSubBtn: "Scan the code or tap the button.", saveSub: "Scan the code with your phone camera.",
+    save: "Save contact", cardLabel: "Business card. Press Enter to flip.",
+    qrAlt: "QR code with contact details", choose: "Choose card", langLabel: "Language",
+    labels: { phone: "Call", whatsapp: "WhatsApp", email: "Email", web: "Website", instagram: "Instagram", address: "Address", link: "Link" }
+  }
+};
+let LANG = "es";
+let flipReady = false; // set once the flip controls below exist
+const tr = v => (v && typeof v === "object" && !Array.isArray(v)) ? (v[LANG] ?? v.es ?? v.en ?? "") : (v ?? "");
+const ui = k => UI[LANG][k];
+
 function vcard(cfg){
-  const [first, ...rest] = cfg.person.name.split(" ");
-  const L = ["BEGIN:VCARD","VERSION:3.0",`N:${rest.join(" ")};${first};;;`,`FN:${cfg.person.name}`,`ORG:${cfg.company.name}`,`TITLE:${cfg.person.title}`];
+  const name = tr(cfg.person.name), [first, ...rest] = name.split(" ");
+  const L = ["BEGIN:VCARD","VERSION:3.0",`N:${rest.join(" ")};${first};;;`,`FN:${name}`,`ORG:${tr(cfg.company.name)}`,`TITLE:${tr(cfg.person.title)}`];
   cfg.contacts.forEach(c => {
     if (c.type === "phone") L.push(`TEL;TYPE=CELL:${c.value.replace(/\s/g,"")}`);
     if (c.type === "email") L.push(`EMAIL:${c.value}`);
     if (c.type === "web") L.push(`URL:${hrefFor(c)}`);
-    if (c.type === "address") L.push(`ADR:;;${c.value};;;;`);
+    if (c.type === "address") L.push(`ADR:;;${tr(c.value)};;;;`);
   });
   L.push("END:VCARD");
   return L.join("\n");
@@ -40,71 +68,112 @@ function barcode(seed){
   let out = ""; for (let i = 0; i < 34; i++){ h = Math.imul(h ^ (h >>> 13), 1274126177); out += `<i style="flex:${1 + ((h >>> 0) % 4)}"></i>`; }
   return out;
 }
+function sealSVG(ring){
+  const text = esc(ring) + " • ";
+  return `<svg viewBox="0 0 100 100" aria-hidden="true"><defs><path id="sealRing" d="M50,50 m-38.5,0 a38.5,38.5 0 1,1 77,0 a38.5,38.5 0 1,1 -77,0"/></defs>
+    <text><textPath href="#sealRing" textLength="240" lengthAdjust="spacing">${text}</textPath></text></svg>`;
+}
 
 function render(key){
   const cfg = CARDS[key];
-  const root = document.documentElement.style, t = cfg.theme || {};
+  const root = document.documentElement, st = root.style, t = cfg.theme || {};
+  root.lang = LANG;
   const map = { accent:"--accent", accent2:"--accent-2", card:"--card", card2:"--card-2", ink:"--ink", steel:"--steel", stage:"--stage" };
-  for (const k in map) if (t[k]) root.setProperty(map[k], t[k]);
-  if (cfg.display) root.setProperty("--display", cfg.display);
+  for (const k in map) if (t[k]) st.setProperty(map[k], t[k]);
+  if (cfg.display) st.setProperty("--display", cfg.display);
 
   const stage = $("stage"), bg = cfg.background || { type: "stage" };
   stage.dataset.bg = bg.type;
   stage.style.background = bg.type === "image" ? `center/cover no-repeat url("${bg.src}"), var(--stage)` : bg.type === "gradient" ? bg.value : "";
 
-  $("passLabel").textContent = cfg.pass.label;
-  $("passSeason").textContent = cfg.pass.season;
-  $("passRole").textContent = cfg.pass.role;
-  $("sealText").textContent = cfg.company.short;
-  const initials = cfg.person.initials || cfg.person.name.split(" ").map(w => w[0]).slice(0,2).join("");
-  $("photo").innerHTML = cfg.person.photo ? `<img src="${esc(cfg.person.photo)}" alt="${esc(cfg.person.name)}">` : `<div class="mono" aria-hidden="true">${esc(initials)}</div>`;
-  $("name").textContent = cfg.person.name;
-  $("title").textContent = cfg.person.title;
-  $("company").textContent = cfg.company.name;
-  $("services").innerHTML = (cfg.services || []).map(s => `<li>${esc(s)}</li>`).join("");
-  $("barcode").innerHTML = barcode(cfg.pass.number + cfg.person.name);
+  const name = tr(cfg.person.name), company = tr(cfg.company.name), seal = cfg.company.seal || {};
+  $("passLabel").textContent = tr(cfg.pass.label);
+  $("passSeason").textContent = tr(cfg.pass.season);
+  $("seal").innerHTML = sealSVG(tr(seal.ring) || company.toUpperCase()) + `<span>${esc(tr(seal.center) || "")}</span>`;
+  const initials = cfg.person.initials || name.split(" ").map(w => w[0]).slice(0,2).join("");
+  $("photo").innerHTML = cfg.person.photo ? `<img src="${esc(cfg.person.photo)}" alt="${esc(name)}">` : `<div class="mono" aria-hidden="true">${esc(initials)}</div>`;
+  $("name").textContent = name;
+  $("title").textContent = tr(cfg.person.title);
+  $("company").textContent = company;
+  $("barcode").innerHTML = barcode(cfg.pass.number + name);
   $("passNo").textContent = "Nº " + cfg.pass.number;
+  $("tapNote").textContent = ui("tap");
 
-  $("logo").innerHTML = cfg.company.logo ? `<img src="${esc(cfg.company.logo)}" alt="${esc(cfg.company.name)}">` : esc(cfg.company.short);
-  $("tagline").textContent = cfg.company.tagline;
-  $("contacts").innerHTML = cfg.contacts.map((c, i) => `
+  $("logo").innerHTML = cfg.company.logo ? `<img src="${esc(cfg.company.logo)}" alt="${esc(company)}">` : esc(company);
+  $("tagline").textContent = tr(cfg.company.tagline);
+  $("flipnote").textContent = ui("flipnote");
+  $("contacts").innerHTML = cfg.contacts.map((c, i) => {
+    const label = tr(c.label) || UI[LANG].labels[c.type] || UI[LANG].labels.link;
+    return `
     <li><a href="${esc(hrefFor(c))}" target="_blank" rel="noopener">
       <span class="ico">${svg(c.type)}</span>
-      <span class="ct"><span class="cl">${esc(c.label)}</span><span class="cv" id="cv${i}">${esc(c.value)}</span></span>
-    </a><button class="copy" type="button" data-i="${i}" aria-label="Copy ${esc(c.label)}">Copy</button></li>`).join("");
-  $("specs").innerHTML = (cfg.specs || []).map(s => `<div><dt>${esc(s.k)}</dt><dd>${esc(s.v)}</dd></div>`).join("");
+      <span class="ct"><span class="cl">${esc(label)}</span><span class="cv" id="cv${i}">${esc(tr(c.value))}</span></span>
+    </a><button class="copy" type="button" data-i="${i}" aria-label="${esc(ui("copy") + " " + label)}" title="${esc(ui("copy"))}">${svg("copy")}</button></li>`;
+  }).join("");
+  const specs = cfg.specs || [];
+  $("specs").hidden = !specs.length;
+  $("specs").innerHTML = specs.map(s => `<div><dt>${esc(tr(s.k))}</dt><dd>${esc(tr(s.v))}</dd></div>`).join("");
 
-  const qr = $("qr"); qr.innerHTML = "";
+  const qr = $("qr"); qr.innerHTML = ""; qr.setAttribute("aria-label", ui("qrAlt"));
   if (window.QRCode) new QRCode(qr, { text: vcard(cfg), width: 256, height: 256, colorDark: "#111014", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
   else qr.innerHTML = '<div style="font:600 10px var(--mono);color:#111;display:grid;place-items:center;height:100%">QR</div>';
+  $("qrcap").textContent = ui("scan");
+  $("saveTitle").textContent = ui("saveTitle");
+  $("saveSub").textContent = cfg.saveContactButton ? ui("saveSubBtn") : ui("saveSub");
 
-  $("saveBtn").hidden = !cfg.saveContactButton;
-  $("saveBtn").onclick = () => {
+  const saveBtn = $("saveBtn");
+  saveBtn.hidden = !cfg.saveContactButton;
+  saveBtn.textContent = ui("save");
+  saveBtn.onclick = () => {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([vcard(cfg)], { type: "text/vcard" }));
-    a.download = cfg.person.name.replace(/\s+/g, "-") + ".vcf"; a.click();
+    a.download = name.replace(/\s+/g, "-") + ".vcf"; a.click();
   };
   $("contacts").onclick = async e => {
     const b = e.target.closest(".copy"); if (!b) return;
-    const val = cfg.contacts[b.dataset.i].value;
-    try { await navigator.clipboard.writeText(val); b.textContent = "Copied"; b.classList.add("done"); }
-    catch { const r = document.createRange(); r.selectNodeContents($("cv" + b.dataset.i)); getSelection().removeAllRanges(); getSelection().addRange(r); b.textContent = "Selected"; }
-    setTimeout(() => { b.textContent = "Copy"; b.classList.remove("done"); }, 1600);
+    const val = tr(cfg.contacts[b.dataset.i].value);
+    const say = t => { b.title = t; const live = $("live"); if (live) live.textContent = t; };
+    try { await navigator.clipboard.writeText(val); b.innerHTML = svg("check"); b.classList.add("done"); say(ui("copied")); }
+    catch { const r = document.createRange(); r.selectNodeContents($("cv" + b.dataset.i)); getSelection().removeAllRanges(); getSelection().addRange(r); say(ui("selected")); }
+    setTimeout(() => { b.innerHTML = svg("copy"); b.classList.remove("done"); b.title = ui("copy"); }, 1600);
   };
-  document.title = cfg.person.name + " · " + cfg.company.name;
+
+  // page chrome
+  $("card").setAttribute("aria-label", ui("cardLabel"));
+  $("hint").textContent = ui("hint");
+  $("picker").setAttribute("aria-label", ui("choose"));
+  $("langSwitch").setAttribute("aria-label", ui("langLabel"));
+  document.querySelectorAll("#langSwitch button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === LANG));
+  if (flipReady) syncFlipButton();
+  document.title = name + " · " + company;
 }
 
-/* ---------- Picker + routing ---------- */
+/* ---------- Routing: ?c=<card>&lang=es|en ---------- */
 const CARDS = window.CARDS || {};
 const keys = Object.keys(CARDS);
-const wanted = new URLSearchParams(location.search).get("c") || location.hash.slice(1);
-const initial = CARDS[wanted] ? wanted : keys[0];
+const params = new URLSearchParams(location.search);
+const wanted = params.get("c") || location.hash.slice(1);
+let current = CARDS[wanted] ? wanted : keys[0];
+const pickLang = l => (l && UI[l]) ? l : (CARDS[current].defaultLang || "es");
+LANG = pickLang((params.get("lang") || "").toLowerCase().slice(0, 2));
+
+function syncURL(){
+  try {
+    const q = new URLSearchParams(location.search);
+    q.set("c", current); q.set("lang", LANG);
+    history.replaceState(null, "", location.pathname + "?" + q.toString());
+  } catch {}
+}
 if (keys.length > 1) {
   const p = $("picker"); p.hidden = false;
-  p.innerHTML = keys.map(k => `<option value="${k}">${esc(CARDS[k].person.name)}</option>`).join("");
-  p.value = initial; p.onchange = () => { render(p.value); try { history.replaceState(null, "", "#" + p.value); } catch {} };
+  p.innerHTML = keys.map(k => `<option value="${k}">${esc(tr(CARDS[k].person.name))}</option>`).join("");
+  p.value = current; p.onchange = () => { current = p.value; render(current); syncURL(); };
 }
-render(initial);
+document.querySelectorAll("#langSwitch button").forEach(b => b.addEventListener("click", () => {
+  if (b.dataset.lang === LANG) return;
+  LANG = b.dataset.lang; render(current); syncURL();
+}));
+render(current);
 
 /* ---------- Motion: tilt, gyro, flip ---------- */
 const card = $("card"), front = $("front"), back = $("back"), flipBtn = $("flipBtn");
@@ -131,11 +200,18 @@ window.addEventListener("pointerup", e => {
 card.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target === card) { e.preventDefault(); flip(); } });
 flipBtn.addEventListener("click", () => { askGyro(); flip(); });
 
+function syncFlipButton(){
+  const showingBack = !!s.flipT;
+  flipBtn.setAttribute("aria-pressed", showingBack);
+  flipBtn.textContent = showingBack ? ui("front") : ui("flip");
+}
+flipReady = true;
+syncFlipButton();
+
 function flip(){
   s.flipT = s.flipT ? 0 : 180;
   const showingBack = !!s.flipT;
-  flipBtn.setAttribute("aria-pressed", showingBack);
-  flipBtn.textContent = showingBack ? "Show front" : "Flip card";
+  syncFlipButton();
   front.classList.toggle("inactive", showingBack); front.setAttribute("aria-hidden", showingBack);
   back.classList.toggle("inactive", !showingBack); back.setAttribute("aria-hidden", !showingBack);
 }
