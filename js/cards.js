@@ -34,8 +34,7 @@ window.CARDS = {
     contacts: [ // type: phone | whatsapp | email | web | instagram | address | link (with href). label is optional.
       { type: "phone",    value: "+58 414 216 1030" },
       { type: "whatsapp", value: "+58 414 216 1030" },
-      { type: "email",    value: "acastillo@sidneyproducciones.com" },
-      { type: "web",      value: "sidneyproducciones.com" }
+      { type: "email",    value: "acastillo@sidneyproducciones.com" }
     ],
     specs: [],            // optional { k, v } pairs shown on the back, e.g. { k: { es: "Tarimas", en: "Stage decks" }, v: "2×1 m" }
     theme: { accent: "#FFB547", accent2: "#FF5C8A", card: "#16151C", card2: "#201F28", ink: "#F2F1F6", steel: "#C7CAD1", stage: "#0B0A10" },
